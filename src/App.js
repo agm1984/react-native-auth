@@ -1,14 +1,16 @@
 import React, { Component } from 'react'
-import { View } from 'react-native'
-import { Header } from './components/common'
+import { View, Text } from 'react-native'
+import { Header, Card, CardSection, Button, LoadingSpinner } from './components/common'
 import LoginForm from './components/LoginForm'
 import firebase from 'firebase'
 
 class App extends Component {
     constructor(props) {
         super(props)
+        // null acts as a 3rd state, we don't know if user is logged in
+        // true = logged in, false = definitely not logged in
         this.state = {
-            loggedIn: false
+            loggedIn: null
         }
     }
 
@@ -30,13 +32,49 @@ class App extends Component {
         })
     }
 
+    renderContent() {
+        switch (this.state.loggedIn) {
+            case true:
+                return (
+                    <Card>
+                        <CardSection>
+                            <Text style={styles.welcomeHeader}>You are logged in.</Text>
+                        </CardSection>
+                        <CardSection>
+                            <Button onPress={() => firebase.auth().signOut()}>
+                                Log Out
+                            </Button>
+                        </CardSection>
+                    </Card>
+                )
+
+            case false:
+                return <LoginForm />
+
+            default:
+                return (
+                    <Card>
+                        <CardSection>
+                            <LoadingSpinner size="large" />
+                        </CardSection>
+                    </Card>
+                )
+        }
+    }
+
     render() {
         return (
             <View>
                 <Header headerText="Authentication" />
-                <LoginForm />
+                {this.renderContent()}
             </View>
         )
+    }
+}
+
+const styles = {
+    welcomeHeader: {
+        padding: 5
     }
 }
 
